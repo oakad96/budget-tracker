@@ -11,6 +11,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { EditTransactionDialog } from "@/components/edit-transaction-dialog";
 import { useStore } from "@/lib/store";
+import { Trash2 } from "lucide-react";
+import { Pencil } from "lucide-react";
 
 interface Transaction {
   id: string;
@@ -81,14 +83,14 @@ export function Transactions() {
                     size="sm"
                     onClick={() => handleEdit(transaction)}
                   >
-                    Edit
+                    <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(transaction.id)}
                   >
-                    Delete
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </TableCell>
               </TableRow>

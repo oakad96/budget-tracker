@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/select";
 import { DEFAULT_CATEGORIES } from "@/lib/types";
 import { toast } from "sonner";
+import { Pencil, Trash2 } from "lucide-react";
 
 export function BudgetSettings() {
   const { state, dispatch } = useStore();
@@ -141,14 +142,14 @@ export function BudgetSettings() {
                     size="sm"
                     onClick={() => handleEdit(budget)}
                   >
-                    Edit
+                    <Pencil className="h-4 w-4" />
                   </Button>
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={() => handleDelete(budget.category)}
                   >
-                    Delete
+                    <Trash2 className="h-4 w-4" />
                   </Button>
                 </div>
               </div>
