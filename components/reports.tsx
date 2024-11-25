@@ -72,13 +72,10 @@ export function Reports() {
     for (const element of elements) {
       const canvas = await html2canvas(element as HTMLElement);
       const imgData = canvas.toDataURL('image/png');
-      
-      // Add section to PDF
       if (yOffset + 100 > pdf.internal.pageSize.height) {
         pdf.addPage();
         yOffset = 10;
       }
-      
       pdf.addImage(
         imgData,
         'PNG',
