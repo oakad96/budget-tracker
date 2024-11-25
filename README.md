@@ -64,6 +64,8 @@ A modern web application for tracking personal finances, built with Next.js, Typ
 
 ## Fake Data
 
+Paste following script to console to generate fake data.
+
 ```typescript
 (() => {
   const CATEGORIES = [
