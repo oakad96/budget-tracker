@@ -12,7 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { DEFAULT_CATEGORIES } from "@/lib/types";
+import { Budget, DEFAULT_CATEGORIES } from "@/lib/types";
 import { toast } from "sonner";
 import { Pencil, Trash2 } from "lucide-react";
 
