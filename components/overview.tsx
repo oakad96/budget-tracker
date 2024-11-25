@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useStore } from "@/lib/store";
 import { formatCurrency } from "@/lib/utils";
@@ -8,6 +9,11 @@ import { CategoryChart } from "./category-chart";
 
 export function Overview() {
   const { state } = useStore();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const totalIncome = state.transactions
     .filter((t) => t.type === "income")
@@ -18,6 +24,10 @@ export function Overview() {
     .reduce((sum, t) => sum + t.amount, 0);
 
   const balance = totalIncome - totalExpenses;
+
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <div className="space-y-4">
@@ -70,7 +80,9 @@ export function Overview() {
           <CardTitle>Expense Distribution</CardTitle>
         </CardHeader>
         <CardContent>
-          <CategoryChart dateOption="1" />
+          <div suppressHydrationWarning>
+            <CategoryChart dateOption="1" />
+          </div>
         </CardContent>
       </Card>
     </div>
