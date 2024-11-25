@@ -19,6 +19,7 @@ export function BudgetSettings() {
   const { state, dispatch } = useStore();
   const [category, setCategory] = useState<string>(DEFAULT_CATEGORIES[0]);
   const [limit, setLimit] = useState("");
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,11 +41,29 @@ export function BudgetSettings() {
     setLimit("");
   };
 
+  const handleEdit = (budget: Budget) => {
+    setEditingBudget(budget);
+    setCategory(budget.category);
+    setLimit(budget.limit.toString());
+  };
+
+  const handleDelete = (category: string) => {
+    if (confirm("Are you sure you want to delete this budget limit?")) {
+      dispatch({
+        type: "DELETE_BUDGET",
+        payload: category,
+      });
+      toast.success("Budget limit deleted successfully");
+    }
+  };
+
   return (
     <div className="space-y-4">
       <Card>
         <CardHeader>
-          <CardTitle>Set Budget Limits</CardTitle>
+          <CardTitle>
+            {editingBudget ? "Edit Budget Limit" : "Set Budget Limits"}
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -53,6 +72,7 @@ export function BudgetSettings() {
               <Select
                 value={category}
                 onValueChange={(value) => setCategory(value)}
+                disabled={!!editingBudget}
               >
                 <SelectTrigger>
                   <SelectValue />
@@ -78,9 +98,24 @@ export function BudgetSettings() {
               />
             </div>
 
-            <Button type="submit" className="w-full">
-              Set Budget Limit
-            </Button>
+            <div className="flex space-x-2">
+              <Button type="submit" className="flex-1">
+                {editingBudget ? "Update Budget" : "Set Budget Limit"}
+              </Button>
+              {editingBudget && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    setEditingBudget(null);
+                    setCategory(DEFAULT_CATEGORIES[0]);
+                    setLimit("");
+                  }}
+                >
+                  Cancel
+                </Button>
+              )}
+            </div>
           </form>
         </CardContent>
       </Card>
@@ -97,7 +132,25 @@ export function BudgetSettings() {
                 className="flex items-center justify-between p-2 rounded bg-secondary"
               >
                 <span>{budget.category}</span>
-                <span className="font-medium">${budget.limit.toFixed(2)}</span>
+                <div className="flex items-center space-x-2">
+                  <span className="font-medium">
+                    ${budget.limit.toFixed(2)}
+                  </span>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEdit(budget)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => handleDelete(budget.category)}
+                  >
+                    Delete
+                  </Button>
+                </div>
               </div>
             ))}
             {state.budgets.length === 0 && (

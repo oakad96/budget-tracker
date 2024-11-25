@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useStore } from "@/lib/store";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Download } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -19,6 +21,8 @@ import {
   subMonths,
 } from "date-fns";
 import { CategoryChart } from "./category-chart";
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 export function Reports() {
   const { state } = useStore();
@@ -54,8 +58,73 @@ export function Reports() {
     };
   });
 
+  const exportToPDF = async () => {
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const elements = document.querySelectorAll('.pdf-section');
+    let yOffset = 10;
+
+    // Add title
+    pdf.setFontSize(20);
+    pdf.text('Financial Report', 20, yOffset);
+    yOffset += 20;
+
+    // Convert each chart section to image and add to PDF
+    for (const element of elements) {
+      const canvas = await html2canvas(element as HTMLElement);
+      const imgData = canvas.toDataURL('image/png');
+      
+      // Add section to PDF
+      if (yOffset + 100 > pdf.internal.pageSize.height) {
+        pdf.addPage();
+        yOffset = 10;
+      }
+      
+      pdf.addImage(
+        imgData,
+        'PNG',
+        10,
+        yOffset,
+        190,
+        80
+      );
+      yOffset += 90;
+    }
+
+    // Add transaction summary
+    pdf.addPage();
+    pdf.setFontSize(16);
+    pdf.text('Transaction Summary', 20, 20);
+    
+    let summaryYOffset = 40;
+    const transactions = state.transactions;
+    
+    // Calculate totals
+    const totalIncome = transactions
+      .filter(t => t.type === 'income')
+      .reduce((sum, t) => sum + t.amount, 0);
+    
+    const totalExpenses = transactions
+      .filter(t => t.type === 'expense')
+      .reduce((sum, t) => sum + t.amount, 0);
+
+    pdf.setFontSize(12);
+    pdf.text(`Total Income: $${totalIncome.toFixed(2)}`, 20, summaryYOffset);
+    pdf.text(`Total Expenses: $${totalExpenses.toFixed(2)}`, 20, summaryYOffset + 10);
+    pdf.text(`Net Balance: $${(totalIncome - totalExpenses).toFixed(2)}`, 20, summaryYOffset + 20);
+
+    // Save the PDF
+    pdf.save('financial-report.pdf');
+  };
+
   return (
     <div className="space-y-4">
+      <div className="flex justify-end mb-4">
+        <Button onClick={exportToPDF} className="flex items-center gap-2">
+          <Download className="h-4 w-4" />
+          Export PDF
+        </Button>
+      </div>
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
           <CardTitle>Monthly Income vs Expenses</CardTitle>
@@ -70,13 +139,14 @@ export function Reports() {
             </SelectContent>
           </Select>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pdf-section">
           <ExpenseBarChart data={data} />
         </CardContent>
       </Card>
+
       <Card>
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Monthly Income vs Expenses</CardTitle>
+          <CardTitle>Expenses by Category</CardTitle>
           <Select value={categoryPeriod} onValueChange={setCategoryPeriod}>
             <SelectTrigger className="w-[180px]">
               <SelectValue />
@@ -88,7 +158,7 @@ export function Reports() {
             </SelectContent>
           </Select>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pdf-section">
           <div className="h-[400px]">
             <CategoryChart dateOption={categoryPeriod} />
           </div>

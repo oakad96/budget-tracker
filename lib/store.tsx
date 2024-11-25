@@ -11,7 +11,13 @@ interface State {
 
 type Action =
   | { type: "ADD_TRANSACTION"; payload: Transaction }
+  | {
+      type: "EDIT_TRANSACTION";
+      payload: { id: string; updates: Partial<Transaction> };
+    }
+  | { type: "DELETE_TRANSACTION"; payload: string }
   | { type: "SET_BUDGET"; payload: Budget }
+  | { type: "DELETE_BUDGET"; payload: string }
   | { type: "LOAD_DATA"; payload: State };
 
 const initialState: State = {
@@ -54,6 +60,20 @@ function reducer(state: State, action: Action): State {
 
       return newState;
 
+    case "EDIT_TRANSACTION":
+      return {
+        ...state,
+        transactions: state.transactions.map((t) =>
+          t.id === action.payload.id ? { ...t, ...action.payload.updates } : t
+        ),
+      };
+
+    case "DELETE_TRANSACTION":
+      return {
+        ...state,
+        transactions: state.transactions.filter((t) => t.id !== action.payload),
+      };
+
     case "SET_BUDGET":
       const existingBudgetIndex = state.budgets.findIndex(
         (b) => b.category === action.payload.category
@@ -69,6 +89,12 @@ function reducer(state: State, action: Action): State {
       return {
         ...state,
         budgets: newBudgets,
+      };
+
+    case "DELETE_BUDGET":
+      return {
+        ...state,
+        budgets: state.budgets.filter((b) => b.category !== action.payload),
       };
 
     case "LOAD_DATA":
