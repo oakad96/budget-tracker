@@ -17,15 +17,28 @@ const COLORS = [
   "#00F5D4",
 ];
 
-export function CategoryChart() {
+export function CategoryChart({ dateOption }: { dateOption: string }) {
   const { state } = useStore();
 
-  const categoryTotals = DEFAULT_CATEGORIES.map((category) => ({
-    category,
-    total: state.transactions
-      .filter((t) => t.type === "expense" && t.category === category)
-      .reduce((sum, t) => sum + t.amount, 0),
-  })).filter((ct) => ct.total > 0);
+  const categoryTotals = DEFAULT_CATEGORIES.map((category) => {
+    const now = new Date();
+    const monthsAgo = new Date();
+    monthsAgo.setMonth(now.getMonth() - parseInt(dateOption));
+
+    return {
+      category,
+      total: state.transactions
+        .filter((t) => {
+          return (
+            t.type === "expense" &&
+            t.category === category &&
+            new Date(t.date) >= monthsAgo &&
+            new Date(t.date) <= now
+          );
+        })
+        .reduce((sum, t) => sum + t.amount, 0),
+    };
+  }).filter((ct) => ct.total > 0);
 
   return (
     <div className="h-[300px]">
